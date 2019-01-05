@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	"strconv"
 	"tools/models"
@@ -11,37 +10,45 @@ type RegionController struct {
 	BaseController
 }
 
+type data struct {
+	Addr string
+	Birth string
+	Gender string
+	Err string
+}
 func (c *RegionController) URLMapping() {
 	c.Mapping("Get", c.Get)
 }
 
-
-// @router / [get]
+// @router /region [get]
 func (this *RegionController) Get() {
+	var info data
 	idcard := this.GetString("idcard")
 	if len(idcard) == 18 {
 		// 取出前6位用来查找地址
 		i, err := strconv.ParseInt(string([]byte(string(idcard)[0:6])), 10, 64)
 		if err != nil {
-			this.Data["err"] = "身份证号不合法！"
+			info.Err = "身份证号不合法！"
 		}
-		if this.Data["addr"], err = getAddr(i); err != nil {
-			this.Data["err"] = "身份证号不合法！"
+		if info.Addr, err = getAddr(i); err != nil {
+			info.Err = "身份证号不合法！"
 		}
-		this.Data["birth"] = getBirth(idcard)
+		info.Birth = getBirth(idcard)
 		i2, _ := strconv.ParseInt(string([]byte(string(idcard)[16:17])), 10, 64)
 		if i2&1 == 1 {
-			this.Data["gender"] = "男"
+			info.Gender = "男"
 		} else {
-			this.Data["gender"] = "女"
+			info.Gender = "女"
 		}
 	} else if(len(idcard)) ==0 {
-		this.Data["err"] = "请输入身份证号！"
+		info.Err = "请输入身份证号！"
 	} else {
-		this.Data["err"] = "身份证号不合法！"
+		info.Err = "身份证号不合法！"
 	}
-	this.Data["idcard"] = idcard
-	this.TplName = "region.html"
+	data := Response{200,"success",info}
+	this.Data["json"] = data
+	this.ServeJSON()
+	return
 }
 
 func getBirth(s string) (res string) {
@@ -74,6 +81,4 @@ func getAddr(idcard int64) (string,error) {
 }
 
 func init() {
-	beego.BConfig.WebConfig.TemplateLeft="<<<"
-	beego.BConfig.WebConfig.TemplateRight=">>>"
 }

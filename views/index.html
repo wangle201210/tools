@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <!-- import CSS -->
+  <link rel="stylesheet" href="../static/css/index.css">
+</head>
+<body>
+  <div id="app">
+    <template>
+      <el-card class="box-card">
+        <el-tabs v-model="activeName" @tab-click="handleClick">
+          <el-tab-pane label="个人所得税计算" name="tax"></el-tab-pane>
+          <el-tab-pane label="身份证所在地查询" name="region"></el-tab-pane>
+        </el-tabs>
+        <div v-if="activeName == 'tax'">
+          <form class="form">
+            <el-row :gutter="20">
+              <el-col :sm="12" :lg="8" :xl="6">
+                <el-input v-model="salary" placeholder="请输入税前工资"></el-input>
+              </el-col>
+              <el-col :sm="12" :lg="8" :xl="6">
+                <el-input v-model="social" placeholder="请输入社保缴费额"></el-input>
+              </el-col>
+            </el-row>
+          </form>
+          <el-alert
+            v-if="err_show"
+            :title="region.err"
+            type="info">
+          </el-alert>
+          <el-card v-else-if="info_show" class="info">
+            <div><span>税改前应纳税所得额: </span>{{tax.old_should}}</div>
+            <div><span>税改前需纳税: </span>{{tax.old_tax}}</div>
+            <div><span>税改前实发工资: </span>{{salary - social - tax.old_tax}}</div>
+            <hr>
+            <div><span>税改后应纳税所得额: </span>{{tax.new_should}}</div>
+            <div><span>税改后需纳税: </span>{{tax.new_tax}}</div>
+            <div><span>税改后实发工资: </span>{{salary - social - tax.new_tax}}</div>
+            <hr>
+            <div><span>税改后多赚: </span>{{tax.new_more}}</div>
+          </el-card>
+        </div>
+        <div v-if="activeName == 'region'">
+          <form class="form">
+            <el-row :gutter="20">
+              <el-col :sm="18" :md="10" :lg="8" :xl="6">
+                <el-input v-model="idcard" name="idcard" placeholder="请输入完整的身份证号" class="idcard"></el-input>
+              </el-col>
+              <el-col :sm="6" :md="4" :lg="4" :xl="3">
+                <el-button type="primary" @click="regionQ">查询</el-button>
+              </el-col>
+            </el-row>
+          </form>
+          <el-alert
+            v-if="err_show"
+            :title="region.err"
+            type="info">
+          </el-alert>
+          <el-card v-else-if="info_show" class="info">
+            <div><span>地址: </span>{{region.addr}}</div>
+            <div><span>生日: </span>{{region.brith}}</div>
+            <div><span>性别: </span>{{region.gender}}</div>
+          </el-card>
+        </div>
+      </el-card>
+    </template>
+  </div>
+</body>
+  <!-- import Vue before Element -->
+  <script src="../static/js/vue.js"></script>
+  <!-- import JavaScript -->
+  <script src="../static/js/index.js"></script>
+  <script src="../static/js/http.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      data: function() {
+        return { 
+          activeName: 'tax',
+          idcard: '',
+          salary: '',
+          social: '',
+          info_show: false,
+          err_show: false,
+          region: {
+            addr: '',
+            brith: '',
+            gender: '',
+            err: '',
+          },
+          tax: {
+            new_more: 0,
+            new_should: 0,
+            new_tax: 0,
+            old_should: 0,
+            old_tax: 0,
+          }
+        }
+      },
+      methods: {
+        handleClick(tab, event) {
+          this.init()
+        },
+        regionQ() {
+          this.init()
+          this.$http.get('/region/?idcard='+this.idcard).then(function(res){
+              item = res.data.data
+              this.region.addr = item.Addr
+              this.region.brith = item.Birth
+              this.region.gender = item.Gender
+              this.region.err = item.Err
+              if (item.Err != '') {
+                this.err_show = true
+              } else {
+                this.info_show = true
+              }
+          },function(res){
+              console.log(res.status);
+          });
+        },
+        taxQ() {
+          this.init()
+          this.$http.get('/tax/?salary='+this.salary+'&social='+this.social||0).then(function(res){
+            this.info_show = true
+            item = res.data.data
+            this.tax.new_more = item.newMore
+            this.tax.new_should = item.newShould
+            this.tax.new_tax = item.newTax
+            this.tax.old_should = item.oldShould
+            this.tax.old_tax = item.oldTax
+          },function(res){
+              console.log(res.status);
+          });
+        },
+        init() {
+          this.info_show = false
+          this.err_show = false
+        }
+      },
+      watch: {
+        salary() {
+          this.taxQ()
+        },
+        social() {
+          this.taxQ()
+        }
+      }
+    })
+  </script>
+  <style type="text/css">
+    .box-card {
+      min-height: 500px;
+    }
+    .form {
+      margin-bottom: 10px;
+    }
+    .info {
+      background-color: #f3f3f380;
+    }
+    .info div {
+      margin: 5px;
+    }
+  </style>
+</html>

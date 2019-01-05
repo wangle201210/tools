@@ -6,5 +6,7 @@ import (
 )
 
 func init() {
+	beego.Include(&controllers.IndexController{})
 	beego.Include(&controllers.RegionController{})
+	beego.Include(&controllers.TaxController{})
 }
