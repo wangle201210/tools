@@ -1,5 +1,7 @@
 package controllers
 
+import "tools/helper"
+
 type TaxController struct {
 	BaseController
 }
@@ -60,11 +62,11 @@ func tax(salary,social,oldStart,newStart float64) map[string]float64 {
 	newTax := getTax(newShould,newLevels)
 	oldTax := getTax(oldShould,oldLevels)
 	data := make(map[string]float64)
-	data["oldTax"] = oldTax // 交税额
-	data["oldShould"] = oldShould // 需要交税的部分
-	data["newTax"] = newTax
-	data["newShould"] = newShould
-	data["newMore"] = oldTax - newTax
+	data["oldTax"] = helper.Decimal(oldTax) // 交税额
+	data["oldShould"] = helper.Decimal(oldShould) // 需要交税的部分
+	data["newTax"] = helper.Decimal(newTax)
+	data["newShould"] = helper.Decimal(newShould)
+	data["newMore"] = helper.Decimal(oldTax - newTax)
 	return data
 }
 
