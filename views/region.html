@@ -14,8 +14,14 @@
         </el-tabs>
         <div v-if="activeName == 'region'">
           <form name="region" class="form" action="/" method="get">
-            <el-input v-model="idcard" name="idcard" placeholder="请输入完整的身份证号" class="idcard"></el-input>
-            <el-button type="primary" @click="query">查询</el-button>
+            <el-row :gutter="20">
+              <el-col :sm="18" :md="10" :lg="8" :xl="6">
+                <el-input v-model="idcard" name="idcard" placeholder="请输入完整的身份证号" class="idcard"></el-input>
+              </el-col>
+              <el-col :sm="6" :md="4" :lg="4" :xl="3">
+                <el-button type="primary" @click="query">查询</el-button>
+              </el-col>
+            </el-row>
           </form>
           <<<if.err>>>
           <div><<<.err>>></div>
@@ -64,13 +70,11 @@
       min-height: 500px;
     }
     .idcard {
-      width: 300px;
     }
     .form {
       margin-bottom: 10px;
     }
     .info {
-      width: 500px;
       background-color: #f3f3f380;
     }
     .info div {
