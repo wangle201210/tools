@@ -3,16 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <!-- import CSS -->
-  <link rel="stylesheet" href="../static/css/index.css">
+  <link rel="stylesheet" href="static/css/index.css">
 </head>
 <body>
   <div id="app">
     <template>
       <el-card :style="maxHeight" class="box-card">
         <el-tabs v-model="activeName" @tab-click="handleClick">
+          <el-tab-pane label="仿站小工具" name="imitate"></el-tab-pane>
           <el-tab-pane label="个人所得税计算" name="tax"></el-tab-pane>
           <el-tab-pane label="身份证所在地查询" name="region"></el-tab-pane>
         </el-tabs>
+        <div v-if="activeName == 'imitate'">
+          <form class="form">
+            <el-row :gutter="20">
+              <el-col :sm="18" :md="10" :lg="8" :xl="6">
+                <el-input v-model="url" name="url" placeholder="请输入完整的Url" class="url"></el-input>
+              </el-col>
+              <el-col :sm="6" :md="4" :lg="4" :xl="3">
+                <el-button type="primary" @click="urlDownload" v-loading.fullscreen.lock="fullscreenLoading">下载</el-button>
+              </el-col>
+            </el-row>
+          </form>
+          <el-alert
+            v-if="err_show"
+            :title="region.err"
+            type="info">
+          </el-alert>
+          <el-card v-else-if="info_show" class="info">
+            <div><span>地址: </span>{{region.addr}}</div>
+            <div><span>生日: </span>{{region.brith}}</div>
+            <div><span>性别: </span>{{region.gender}}</div>
+          </el-card>
+        </div>
         <div v-if="activeName == 'tax'">
           <el-form class="form" label-width="100px">
             <el-row :gutter="20">
@@ -72,22 +95,23 @@
   </div>
 </body>
   <!-- import Vue before Element -->
-  <script src="../static/js/vue.js"></script>
+  <script src="static/js/vue.js"></script>
   <!-- import JavaScript -->
-  <script src="../static/js/index.js"></script>
-  <script src="../static/js/http.js"></script>
+  <script src="static/js/index.js"></script>
+  <script src="static/js/http.js"></script>
   <script>
     new Vue({
       el: '#app',
       data: function() {
         return { 
           fullHeight: document.documentElement.clientHeight - 20,
-          activeName: 'tax',
+          activeName: 'imitate',
           idcard: '',
           salary: '',
           social: '',
           info_show: false,
           err_show: false,
+          url: '',
           region: {
             addr: '',
             brith: '',
@@ -100,7 +124,8 @@
             new_tax: 0,
             old_should: 0,
             old_tax: 0,
-          }
+          },
+          fullscreenLoading: false,
         }
       },
       computed: {
@@ -115,6 +140,25 @@
       methods: {
         handleClick(tab, event) {
           this.init()
+        },
+        urlDownload() {
+          this.fullscreenLoading = true;
+          this.init()
+          this.$http.get('/imitate/?url='+this.url).then(function(res){
+              this.fullscreenLoading = false;
+              item = res.data
+              if (item.code == 200) {
+                setTimeout(window.open(item.data, '_blank'), 500);
+              } else {
+                this.$message({
+                  message: '下载失败!',
+                  type: 'warning'
+                });
+              }
+
+          },function(res){
+              console.log(res.status);
+          });
         },
         regionQ() {
           this.init()

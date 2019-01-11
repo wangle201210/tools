@@ -7,6 +7,15 @@ import (
 
 func init() {
 
+    beego.GlobalControllerRouter["tools/controllers:ImitateController"] = append(beego.GlobalControllerRouter["tools/controllers:ImitateController"],
+        beego.ControllerComments{
+            Method: "Get",
+            Router: `/imitate`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["tools/controllers:IndexController"] = append(beego.GlobalControllerRouter["tools/controllers:IndexController"],
         beego.ControllerComments{
             Method: "Get",
