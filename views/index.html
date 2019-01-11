@@ -21,20 +21,19 @@
                 <el-input v-model="url" name="url" placeholder="请输入完整的Url" class="url"></el-input>
               </el-col>
               <el-col :sm="6" :md="4" :lg="4" :xl="3">
-                <el-button type="primary" @click="urlDownload" v-loading.fullscreen.lock="fullscreenLoading">下载</el-button>
+                <el-button type="primary" 
+                  @click="urlDownload" 
+                  v-loading.fullscreen="loading"
+                  element-loading-text="下载数据中,请稍等 ... ..."
+                  element-loading-spinner="el-icon-loading"
+                  element-loading-background="rgba(0, 0, 0, 0.8)">下载</el-button>
               </el-col>
             </el-row>
           </form>
           <el-alert
-            v-if="err_show"
-            :title="region.err"
-            type="info">
+            title="输入网址需要是全网址"
+            type="success">
           </el-alert>
-          <el-card v-else-if="info_show" class="info">
-            <div><span>地址: </span>{{region.addr}}</div>
-            <div><span>生日: </span>{{region.brith}}</div>
-            <div><span>性别: </span>{{region.gender}}</div>
-          </el-card>
         </div>
         <div v-if="activeName == 'tax'">
           <el-form class="form" label-width="100px">
@@ -125,7 +124,7 @@
             old_should: 0,
             old_tax: 0,
           },
-          fullscreenLoading: false,
+          loading: false,
         }
       },
       computed: {
@@ -142,10 +141,10 @@
           this.init()
         },
         urlDownload() {
-          this.fullscreenLoading = true;
+          this.loading = true;
           this.init()
           this.$http.get('/imitate/?url='+this.url).then(function(res){
-              this.fullscreenLoading = false;
+              this.loading = false;
               item = res.data
               if (item.code == 200) {
                 setTimeout(window.open(item.data, '_blank'), 500);
