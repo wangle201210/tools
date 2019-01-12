@@ -1,6 +1,8 @@
 package controllers
 
-import "tools/pkg/worker"
+import (
+	"tools/pkg/worker"
+)
 
 type ImitateController struct {
 	BaseController

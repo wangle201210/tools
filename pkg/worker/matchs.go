@@ -116,12 +116,12 @@ func GetFileInfo(c []byte) (files []string) {
 	for _,m := range imgLinkMatchs{
 		files = append(files,string(m[1]))
 	}
-
-	img2Link := regexp.MustCompile(`url\(([A-Za-z0-9\.\_\-\\\/]*)\)`)
+	img2Link := regexp.MustCompile(`url\(([A-Za-z0-9\.\_\-\\\/\?\#\&\=]*)\)`)
 	img2LinkMatchs := img2Link.FindAllSubmatch(c,-1)
 	for _,m := range img2LinkMatchs{
 		files = append(files,string(m[1]))
 	}
+	files = RemoveRep(files)
 	return
 }
 // 看下开头是http 还是https
@@ -157,5 +157,15 @@ func RemoveRep(s []string) []string {
 			m[v] = true
 		}
 	}
-	return result
+	return reduce(result)
+}
+
+//去除多余标志比如？&#@等
+func reduce(s []string) (r []string) {
+	for _,f := range s{
+		re := regexp.MustCompile(`[A-Za-z0-9\/\_\.\-\\]*`)
+		ma := re.FindSubmatch([]byte(f))
+		r = append(r,string(ma[0]))
+	}
+	return
 }

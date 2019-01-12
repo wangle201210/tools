@@ -1,16 +1,16 @@
 package worker
 
 import (
-	"archive/zip"
-	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 )
+
+var Wg sync.WaitGroup
 
 func Imitate(url string) (filePath string) {
 	u := []byte(url)
@@ -30,6 +30,7 @@ func Imitate(url string) (filePath string) {
 	//pn 是不好http的请求地址
 	//最后一个参数记录当前地址
 	CreateFiles(files,url,pn,"")
+	Wg.Wait()
 	filePath = BaseUrl+pn+".zip"
 	Zip(BaseUrl+pn,filePath)
 	return
@@ -64,6 +65,7 @@ func GetIndexAndCreateFile(url string,path string) (c []byte)  {
 //pn 是不带http的请求地址
 //最后一个参数记录当前地址
 func CreateFiles(files []string,url string,pn string,nowPath string)  {
+
 	for _,file := range files{
 		//如果是以http开头的即是外链，不用下载（但是是自己网址下的就要下载）
 		if len(file) > 7 && file[0:len(header(url))] == header(url) || file == "/" || file == "" || len(file) < 3 {
@@ -80,19 +82,19 @@ func CreateFiles(files []string,url string,pn string,nowPath string)  {
 				canDown = true
 			}
 		}
+
 		if canDown {
-			f := GetContentAndCreateFile(file,url,pn,nowPath)
-			if f != nil {
-				continue
-			}
+			Wg.Add(1)
+			go GetContentAndCreateFile(file,url,pn,nowPath)
 		}
-		//fmt.Printf("%s",f)
 	}
+
 }
 // 生成文件并保存
 // pn projectName 是项目存放的根目录
 // url 是项目的首页网址
-func GetContentAndCreateFile(file string,url string,pn string,path string) (c []byte)  {
+func GetContentAndCreateFile(file,url string,pn string,path string) (c []byte)  {
+	defer Wg.Done()
 	fmt.Printf("downloading:%s\n",header(url)+ "://"+pn+"/"+file)
 	resp, err := http.Get(header(url)+ "://"+pn+"/"+file)
 	if err != nil {
@@ -105,8 +107,6 @@ func GetContentAndCreateFile(file string,url string,pn string,path string) (c []
 	_, ce := FileCreate(pn+"/"+file)
 	check(ce)
 	c = NeedRep(file,c)
-	//c = []byte(strings.Replace(string(c), `'/`, `'./`, -1))
-	//c = []byte(strings.Replace(string(c), `"/`, `"./`, -1))
 	err = ioutil.WriteFile(BaseUrl+pn+"/"+file, c, 0644)
 	check(err)
 	//深层处理
@@ -115,6 +115,7 @@ func GetContentAndCreateFile(file string,url string,pn string,path string) (c []
 	fmt.Printf("need info is :%s\n",pn+"/"+file)
 	newPn := strings.Join(split[:len(split)-1],"/")
 	CreateFiles(files,url,newPn,path)
+	//ch<-file
 	return
 }
 
@@ -135,42 +136,5 @@ func check(e error) {
 		fmt.Printf("this is a err:%s",e)
 	}
 }
-
-
-func createZip() {
-	buf := new(bytes.Buffer)
-
-	w := zip.NewWriter(buf)
-
-	var files = []struct {
-		Name, Body string
-	}{
-		{"1.txt", "first"},
-		{"2.txt", "second"},
-		{"3.txt", "third"},
-	}
-	for _, file := range files {
-		f, err := w.Create(file.Name)
-		if err != nil {
-			log.Fatal(err)
-		}
-		_, err = f.Write([]byte(file.Body))
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	err := w.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	f, err := os.OpenFile("file.zip", os.O_CREATE|os.O_WRONLY, 0666)
-	if err != nil {
-		log.Fatal(err)
-	}
-	buf.WriteTo(f)
-}
-
 
 

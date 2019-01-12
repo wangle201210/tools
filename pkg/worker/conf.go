@@ -15,6 +15,8 @@ var fileAble = []string{
 	"svg",
 	"woff",
 	"ico",
+	"eot",
+	"svg",
 }
 //需要被替换为相对链接的文件
 var needRep = []string{
