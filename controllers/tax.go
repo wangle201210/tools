@@ -1,6 +1,6 @@
 package controllers
 
-import "tools/helper"
+import "github.com/wangle201210/tools/helper"
 
 type TaxController struct {
 	BaseController
@@ -21,9 +21,10 @@ func (c *TaxController) URLMapping() {
 func (this *TaxController) Get() {
 	salary, _ := this.GetFloat("salary")
 	social, _ := this.GetFloat("social")
+	zx, _ := this.GetFloat("zx")
 	oldStart := float64(3500)
 	newStart := float64(5000)
-	info := tax(salary, social, oldStart, newStart)
+	info := tax(salary, social, zx, oldStart, newStart)
 	data := Response{200,"success",info}
 	this.Data["json"] = data
 	this.ServeJSON()
@@ -31,7 +32,7 @@ func (this *TaxController) Get() {
 }
 
 
-func tax(salary,social,oldStart,newStart float64) map[string]float64 {
+func tax(salary,social,zx, oldStart,newStart float64) map[string]float64 {
 	newLevels := []info{
 		{3000,0.03,0},
 		{12000,0.1,210},
@@ -59,8 +60,8 @@ func tax(salary,social,oldStart,newStart float64) map[string]float64 {
 	if newShould < 0  {
 		newShould = 0
 	}
-	newTax := getTax(newShould,newLevels)
-	oldTax := getTax(oldShould,oldLevels)
+	newTax := getTax(newShould - zx,newLevels)
+	oldTax := getTax(oldShould -zx,oldLevels)
 	data := make(map[string]float64)
 	data["oldTax"] = helper.Decimal(oldTax) // 交税额
 	data["oldShould"] = helper.Decimal(oldShould) // 需要交税的部分

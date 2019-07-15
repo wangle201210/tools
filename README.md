@@ -4,7 +4,7 @@
  1.clone 项目 --git clone https://github.com/wangle201210/tools.git
  2.数据库文件在sql内,可以直接使用
  3.本地运行项目(默认位8080端口) --bee run 
- 4.访问localhost:80080
+ 4.访问localhost:8080
  ```
 
 ## 线上运行
@@ -27,4 +27,6 @@
 ## 下一步
   ```
   添加im聊天室（使用jwt验证身份）  预计年后到上班前完成（2019/02/12）
+  详情见 <https://github.com/wangle201210/im>
+  
   ```

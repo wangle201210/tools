@@ -3,7 +3,7 @@ package controllers
 import (
 	"github.com/astaxie/beego/orm"
 	"strconv"
-	"tools/models"
+	"github.com/wangle201210/tools/models"
 )
 
 type RegionController struct {

@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"tools/pkg/worker"
+	"github.com/wangle201210/tools/pkg/worker"
 )
 
 type ImitateController struct {

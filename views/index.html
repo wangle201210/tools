@@ -51,6 +51,11 @@
                   <el-input v-model="social" placeholder="请输入社保缴费额"></el-input>
                 </el-form-item>
               </el-col>
+              <el-col :sm="12" :lg="8" :xl="6">
+                <el-form-item label="专项扣除">
+                  <el-input v-model="zx" placeholder="请输入专项扣除金额"></el-input>
+                </el-form-item>
+              </el-col>
             </el-row>
           </el-form>
           <el-alert
@@ -110,7 +115,8 @@
           activeName: 'imitate',
           idcard: '',
           salary: '',
-          social: '',
+          social: 0,
+          zx: 0,
           info_show: false,
           err_show: false,
           url: '',
@@ -180,8 +186,9 @@
           });
         },
         taxQ() {
+          console.log(this.zx)
           this.init()
-          this.$http.get('/tax/?salary='+this.salary+'&social='+this.social||0).then(function(res){
+          this.$http.get('/tax/?salary='+this.salary+'&social='+this.social+'&zx='+this.zx).then(function(res){
             this.info_show = true
             item = res.data.data
             this.tax.new_more = item.newMore
@@ -203,6 +210,9 @@
           this.taxQ()
         },
         social() {
+          this.taxQ()
+        },
+        zx() {
           this.taxQ()
         }
       }

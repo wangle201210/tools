@@ -1,1 +1,6 @@
 .idea/
+go.sum
+static/error/
+vendor/
+static/.htaccess
+conf/app.conf
